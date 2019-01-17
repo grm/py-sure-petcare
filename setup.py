@@ -3,7 +3,7 @@ import sys
 from setuptools.command.test import test as TestCommand
 from os.path import splitext, basename
 from glob import glob
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -25,8 +25,11 @@ def format_version(version, fmt=fmt):
 
 
 def get_git_version():
-    git_version = check_output(command.split()).decode("utf-8").strip()
-    return format_version(version=git_version)
+    try:
+        git_version = check_output(command.split()).decode("utf-8").strip()
+        return format_version(version=git_version)
+    except CalledProcessError:
+        return "0.1.0"
 
 
 tests_require = ["pytest>=3.6", "coverage", "pytest-cov", "requests_mock"]
