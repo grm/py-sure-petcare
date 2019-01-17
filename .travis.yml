@@ -1,0 +1,33 @@
+env:
+  global:
+  - CC_TEST_REPORTER_ID=149f4b36e9225c9453de34268689f72997955a383e7bbc44a633deb1ba292308
+language: python
+python:
+- '3.5'
+- '3.6'
+- '3.7-dev'
+install:
+- pip install -r requirements.txt
+- pip install codecov wheel cmarkgfm
+- pip install --upgrade pytest
+before_script:
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+  > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+- "./cc-test-reporter before-build"
+script:
+- python setup.py test
+after_script:
+- "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
+after_success:
+- codecov
+deploy:
+  provider: pypi
+  user: "grm"
+  password:
+    secure: Q7oGxSOjGFpgc9ROS+HrNnWAQ1ewSRaQg2MVKGXP66jW7sKAdg10jGUT5mR1XX74c9/6EzeFam9T2DxNjp+ky+Y0MjLi3niAu2+Q/WfHSsLSPamoSa/fAEMV+BsmK1vV2EPoRmNwQ6ZMwswXrkNK6RmH25yTft/fkP6xaRWY5u3zI5uK8eb7Rfm+kGjWoIb9YS7P9yGb3+hqXJmozE902ZKL8+yT1S/sIouJopYT2BQcxZzLq3H/p6mjHOQEFCxBwgm4XPweS89IrM8eiQ7z3b36WQxXQ785esrXsjYgoGSlnLR1Y5WyOPnXLkubo2lgdenkY5vNgWSOIH7nUSv9I743KbfGMsNDCzDHd0r5iO6pPHGYAl9YNl2TiPOwHmjKEmUibEh67VIRGp6/ucJ30hi63UeOTHaINr2k624fS5T1NHvDbe6CYOju6puGla+G+2TnGWr1ttrcwev8G/8Z8NsjY30W8mf+4h/4+BWbPt7r4XJqrkr1G3lq3r9F/Ku7SaYzr3UosUZk+UCCc3QWlIvbbaMpFeWNdvTVi2VCpMz2tfbxOTaIL043wJraraEDwR2EQHQ23ehyqHE2R2q5KSoiPBoR8+WXWi35yMvEFBVmCLutSDbzLbHvfUGybsJV8esB/1qHTEk+vZI8VY3TWHBsDcNqMjAyCPcOJzTOrnI=
+  on:
+    tags: true
+    branch: master
+    python: '3.7-dev'
+  distributions: "register sdist bdist_wheel"
