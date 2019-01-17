@@ -1,0 +1,15 @@
+version: "2"
+plugins:
+  duplication:
+    enabled: true
+  pep8:
+    enabled: true
+  radon:
+    enabled: true
+  sonar-python:
+    enabled: true
+exclude_patterns:
+  - "tests/"
+  - "sure_petcare/"
+  - "hass_test.py"
+  - "sp_cli.py"
