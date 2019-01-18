@@ -105,3 +105,6 @@ ENV/
 
 #Pycharm folder
 .idea
+
+#While migrating 
+sure_petcare.old
