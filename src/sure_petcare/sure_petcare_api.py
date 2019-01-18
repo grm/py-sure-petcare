@@ -6,7 +6,7 @@ import requests
 
 from enum import Enum
 
-CACHE_FILE = os.path.expanduser("~/.surepet.cache")
+CACHE_FILE_PATH = os.path.expanduser("~/.surepet.cache")
 
 
 class Event(Enum):
@@ -44,35 +44,19 @@ class Locations(Enum):
 class SurePetApi:
     """Class to take care of network communication with SurePet's products."""
 
-    API_USER_AGENT = "Mozilla/5.0 (Linux; Android 7.0; SM-G930F Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/64.0.3282.137 Mobile Safari/537.36"
-    CACHE_FILE = os.path.expanduser("~/.surepet.cache")
+    API_USER_AGENT = (
+        "Mozilla/5.0 (Linux; Android 7.0; SM-G930F Build/NRD90M; wv) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Version/4.0 Chrome/64.0.3282.137 Mobile Safari/537.36"
+    )
 
     def __init__(
-        self,
-        email_address=None,
-        password=None,
-        household_id=None,
-        device_id=None,
-        cache_file=CACHE_FILE,
-        debug=False,
+        self, email_address=None, password=None, cache_file=CACHE_FILE_PATH, debug=False
     ):
         """
         `email_address` and `password` are self explanatory.  They are cached on
         disc file `cache_file` and are therefore only mandatory on first
         invocation (or if either have been changed).
-
-        `household_id` need only be specified if your account has access to more
-        than one household and you know its ID.  You can find out which is which
-        by examining property `households`.
-
-        You can set the default household after the fact by assigning the
-        appropriate ID to property `default_household` if the initial default
-        is not to your liking.  This assignment will persist in the cache, so
-        you only need do it the once.  Do not set it to None or you will get
-        exceptions.
-
-        `device_id` is the ID of *this* client.  If none supplied, a plausible,
-        unique-ish default is supplied.
 
         Cache
         -----
@@ -101,9 +85,8 @@ class SurePetApi:
         update what you need and leave context as soon as possible.
         """
         # cache_status is None to indicate that it hasn't been initialised
-        self.cache_file = cache_file or CACHE_FILE
+        self.cache_file = cache_file or CACHE_FILE_PATH
         self.cache_lockfile = self.cache_file + ".lock"
-        self._init_default_household = household_id
         self._init_email = email_address
         self._init_pw = password
         # self._load_cache()
@@ -114,13 +97,13 @@ class SurePetApi:
             raise ValueError("No cached credentials and none provided")
         self.debug = debug
         self.s = requests.session()
+        if self.cache["device_id"] is None:
+            self.device_id = str(uuid.uuid4())
+        else:
+            self.device_id = self.cache["device_id"]
         if debug:
             self.req_count = self.req_rx_bytes = 0
             self.s.hooks["response"].append(self._log_req)
-        if device_id is None:
-            self.device_id = str(uuid.uuid4())
-        else:
-            self.device_id = device_id
 
     def _load_cache(self):
         """
@@ -142,4 +125,5 @@ class SurePetApi:
                 "pet_timeline": {},  # indexed by household
                 "house_timeline": {},  # indexed by household
                 "version": 1,  # of cache structure.
+                "device_id": None,
             }
