@@ -89,7 +89,8 @@ class SurePetApi:
         self.cache_lockfile = self.cache_file + ".lock"
         self._init_email = email_address
         self._init_pw = password
-        # self._load_cache()
+        self.household = None
+        self._load_cache()
         self.__read_only = True
         if (email_address is None or password is None) and self.cache[
             "AuthToken"
@@ -114,11 +115,11 @@ class SurePetApi:
         try:
             with open(self.cache_file, "rb") as f:
                 self.cache = pickle.load(f)
-        except (pickle.PickleError, OSError):
+        except (pickle.PickleError, OSError, EOFError):
             self.cache = {
                 "AuthToken": None,
                 "households": None,
-                "default_household": self._init_default_household,
+                "default_household": self.household,
                 "router_status": {},  # indexed by household
                 "flap_status": {},  # indexed by household
                 "pet_status": {},  # indexed by household
